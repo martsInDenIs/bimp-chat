@@ -1,6 +1,7 @@
 import { FastifyEnvOptions } from "@fastify/env";
 
-type ENVS = {
+// TODO: Bind the type with the schema below
+export type ENVS = {
   PORT: number;
 };
 
@@ -14,14 +15,8 @@ const schema: FastifyEnvOptions["schema"] = {
   },
 };
 
-export const envConfig: FastifyEnvOptions = {
+export const config: FastifyEnvOptions = {
   confKey: "config",
   dotenv: true,
   schema,
 };
-
-declare module "fastify" {
-  interface FastifyInstance {
-    config: ENVS;
-  }
-}
