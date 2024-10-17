@@ -4,6 +4,7 @@ import { MessagesInstance } from "./types";
 import { MessageType, Message } from "@prisma/client";
 import fs from "fs";
 import fastifyMultipart, { MultipartFile } from "@fastify/multipart";
+import mime from "mime";
 
 const onFile = async (part: MultipartFile) => {
   const writeStream = fs.createWriteStream(
@@ -31,6 +32,9 @@ export const router: FastifyPluginAsync = async (instance) => {
     attachFieldsToBody: "keyValues",
     onFile,
     prefix: "/message/file",
+    limits: {
+      fileSize: Infinity,
+    },
   });
   instance.decorate(
     "messagesService",
@@ -59,6 +63,34 @@ export const router: FastifyPluginAsync = async (instance) => {
       });
 
       res.status(200);
+    }
+  );
+
+  messagesInstance.get<{
+    Querystring: { skip: number; take: number } | { page: number };
+  }>("/list", async (req, res) => {
+    const messagesNumber = await messagesInstance.messagesService.count();
+    const messages = await messagesInstance.messagesService.get(req.query);
+
+    return { messagesNumber, messages };
+  });
+  messagesInstance.get<{ Querystring: { id: string } }>(
+    "/content",
+    async (req, res) => {
+      const message = await messagesInstance.messagesService.getById(
+        req.query.id
+      );
+
+      if (message?.type === MessageType.FILE) {
+        const readStream = fs.createReadStream(
+          `${process.cwd()}${message.content}`
+        );
+        const fileType = mime.getType(message.content);
+
+        return res.type(fileType!).send(readStream);
+      }
+
+      return res.type("text/plain").send(message?.content);
     }
   );
 };
