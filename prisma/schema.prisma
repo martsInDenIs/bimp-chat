@@ -14,7 +14,21 @@ datasource db {
 }
 
 model Account {
-  id       String @id @default(uuid()) @db.Uuid
-  email    String @unique
+  id       String    @id @default(uuid()) @db.Uuid
+  email    String    @unique
   password String
+  Message  Message[]
+}
+
+model Message {
+  id        String      @id @default(uuid()) @db.Uuid
+  type      MessageType
+  account   Account     @relation(fields: [accountId], references: [id])
+  accountId String      @db.Uuid
+  content   String
+}
+
+enum MessageType {
+  TEXT
+  FILE
 }
