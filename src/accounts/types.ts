@@ -1,7 +1,7 @@
-import { FastifyInstance } from "fastify";
 import AccountsService from "./service";
+import { FastifyInstanceWithTypeBoxProvider } from "../types";
 
-export interface AccountsInstance extends FastifyInstance {
+export interface AccountsInstance extends FastifyInstanceWithTypeBoxProvider {
   accountsService: AccountsService;
 }
 

@@ -1,32 +1,34 @@
-import { FastifyPluginAsync } from "fastify";
+import { FastifyInstance, FastifyPluginAsync } from "fastify";
 import AccountsService from "./service";
 import fastifyBcrypt from "fastify-bcrypt";
-import { AccountsInstance, CreateAccountBody } from "./types";
+import { AccountsInstance } from "./types";
+import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
+import { accountRegisterSchema } from "./schemas";
 
-const router: FastifyPluginAsync = async (instance) => {
+const router: FastifyPluginAsync = async (instance: FastifyInstance) => {
   instance.register(fastifyBcrypt);
   instance.decorate(
     "accountsService",
     new AccountsService(instance.database.account)
   );
 
-  // TODO: temporal solution
-  const accountsInstance = instance as AccountsInstance;
-  accountsInstance.post<{ Body: CreateAccountBody }>(
+  const accountsInstance =
+    instance.withTypeProvider<TypeBoxTypeProvider>() as AccountsInstance;
+
+  accountsInstance.post(
     "/register",
-    async (req, res) => {
-      // TODO: Add schema validation
+    { schema: accountRegisterSchema },
+    async (req, rep) => {
       const { email, password } = req.body;
 
-      const hasPassword = await instance.bcrypt.hash(password);
+      const hashedPassword = await instance.bcrypt.hash(password);
 
       try {
-        await accountsInstance.accountsService.create(email, hasPassword);
+        await accountsInstance.accountsService.create(email, hashedPassword);
+        return rep.created(btoa(`${email}:${hashedPassword}`));
       } catch (err) {
-        return res.status(409).send();
+        return rep.conflict();
       }
-
-      return res.status(201).send();
     }
   );
 };
