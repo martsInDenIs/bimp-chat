@@ -1,0 +1,24 @@
+{
+  "name": "fastify-chat",
+  "version": "1.0.0",
+  "description": "Test task for the BIMP company",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node index.js",
+    "start:dev": "tsx index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Denys Martsyn",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/env": "^5.0.1",
+    "fastify": "^5.0.0",
+    "tsx": "^4.19.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "typescript": "^5.6.3"
+  }
+}
