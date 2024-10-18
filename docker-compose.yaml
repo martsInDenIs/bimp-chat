@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  database:
+    image: postgres:latest
+    restart: always
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}']
+      interval: 5s
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  server:
+    entrypoint: ['sh', '-c', 'npx prisma migrate deploy && npm run start:dev']
+    environment:
+      DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@database:5432/${DATABASE_NAME},
+      HOST: '0.0.0.0'
+    depends_on:
+      database:
+        condition: service_healthy
+    build:
+      dockerfile: ./Dockerfile
+    ports: ['${PORT}:${PORT}']
+volumes:
+  postgres_data:
