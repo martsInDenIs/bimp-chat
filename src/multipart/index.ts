@@ -1,8 +1,9 @@
 import fastifyMultipart, { MultipartFile } from "@fastify/multipart";
-import { FastifyInstance, FastifyPluginAsync } from "fastify";
+import { FastifyInstance, FastifyRequest } from "fastify";
 import fs from "fs";
+import { MultipartFileWithResponseValue } from "./types";
 
-const onFile = async (part: MultipartFile) => {
+const onFile = async function (this: FastifyRequest, part: MultipartFile) {
   const writeStream = fs.createWriteStream(
     `${process.cwd()}/uploads/${part.filename}`
   );
@@ -10,9 +11,10 @@ const onFile = async (part: MultipartFile) => {
 
   await new Promise((response, reject) => {
     writeStream.on("finish", () => {
-      console.log("File saving done!");
-      // TODO: Think about solution for the types below
-      part.value = part.filename;
+      const partWithResponse = part as MultipartFileWithResponseValue;
+      this.log.info("File saving done!");
+
+      partWithResponse.value = part.filename;
       response("done");
     });
 
