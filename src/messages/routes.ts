@@ -1,55 +1,80 @@
 import { FastifyPluginAsync } from "fastify";
 import MessagesService from "./service";
 import { MessagesInstance } from "./types";
-import { MessageType, Message } from "@prisma/client";
+import { MessageType } from "@prisma/client";
 import fs from "fs";
-import { MultipartFile } from "@fastify/multipart";
 import mime from "mime";
-import multipartPlugin from "../multipart";
+import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
+import {
+  getMessageContentSchema,
+  getMessagesListSchema,
+  postFileMessageSchema,
+  postTextMessageSchema,
+} from "./schemas";
+import registerMultipartPlugin from "../multipart";
 
 // TODO: Create schemas
 export const router: FastifyPluginAsync = async (instance) => {
-  instance.register(multipartPlugin);
+  registerMultipartPlugin(instance);
   instance.decorate(
     "messagesService",
     new MessagesService(instance.database.message)
   );
 
-  const messagesInstance = instance as MessagesInstance;
-  messagesInstance.post<{
-    Body: {
-      type: MessageType;
-      accountId: Message["accountId"];
-      content: Message["content"];
-    };
-  }>("/text", (req, res) => {
-    messagesInstance.messagesService.create(req.body);
-  });
-  messagesInstance.post<{ Body: MultipartFile & Pick<Message, "accountId"> }>(
-    "/file",
-    async (req, res) => {
-      const pathToFile = `/uploads/${req.body.file}`;
+  const messagesInstance =
+    instance.withTypeProvider<TypeBoxTypeProvider>() as MessagesInstance;
 
-      await messagesInstance.messagesService.create({
-        type: MessageType.FILE,
-        accountId: req.body.accountId,
-        content: pathToFile,
-      });
-
-      res.status(200);
+  messagesInstance.post(
+    "/text",
+    { schema: postTextMessageSchema },
+    async (req, rep) => {
+      try {
+        await messagesInstance.messagesService.create({
+          ...req.body,
+          type: MessageType.TEXT,
+        });
+        return rep.created();
+      } catch (err) {
+        return rep.serverError(err);
+      }
     }
   );
 
-  messagesInstance.get<{
-    Querystring: { skip: number; take: number } | { page: number };
-  }>("/list", async (req, res) => {
-    const messagesNumber = await messagesInstance.messagesService.count();
-    const messages = await messagesInstance.messagesService.get(req.query);
+  messagesInstance.post(
+    "/file",
+    { schema: postFileMessageSchema },
+    async (req, res) => {
+      const pathToFile = `/uploads/${req.body.file}`;
 
-    return { messagesNumber, messages };
-  });
-  messagesInstance.get<{ Querystring: { id: string } }>(
+      try {
+        await messagesInstance.messagesService.create({
+          type: MessageType.FILE,
+          accountId: req.body.accountId,
+          content: pathToFile,
+        });
+        return res.created();
+      } catch (err) {
+        fs.unlink(`${process.cwd}${pathToFile}`, (err) => {
+          instance.log.error(err);
+        });
+        return res.serverError(err);
+      }
+    }
+  );
+
+  messagesInstance.get(
+    "/list",
+    { schema: getMessagesListSchema },
+    async (req) => {
+      const messagesNumber = await messagesInstance.messagesService.count();
+      const messages = await messagesInstance.messagesService.get(req.query);
+
+      return { messagesNumber, messages };
+    }
+  );
+  messagesInstance.get(
     "/content",
+    { schema: getMessageContentSchema },
     async (req, res) => {
       const message = await messagesInstance.messagesService.getById(
         req.query.id

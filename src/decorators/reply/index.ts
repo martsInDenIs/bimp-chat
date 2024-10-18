@@ -5,6 +5,7 @@ declare module "fastify" {
   interface FastifyReply {
     created(payload?: unknown): void;
     conflict(): void;
+    serverError(err: unknown): void;
   }
 }
 
@@ -14,6 +15,9 @@ const replyPlugin: FastifyPluginAsync = fastifyPlugin(async (instance) => {
   });
   instance.decorateReply("conflict", function () {
     this.status(409).send();
+  });
+  instance.decorateReply("serverError", function (err) {
+    this.status(500).send(err);
   });
 });
 

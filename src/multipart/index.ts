@@ -1,5 +1,6 @@
 import fastifyMultipart, { MultipartFile } from "@fastify/multipart";
-import { FastifyPluginAsync } from "fastify";
+import { FastifyInstance, FastifyPluginAsync } from "fastify";
+import fs from "fs";
 
 const onFile = async (part: MultipartFile) => {
   const writeStream = fs.createWriteStream(
@@ -21,7 +22,7 @@ const onFile = async (part: MultipartFile) => {
   });
 };
 
-const multipartPlugin: FastifyPluginAsync = async (instance) => {
+const registerMultipartPlugin = async (instance: FastifyInstance) => {
   instance.register(fastifyMultipart, {
     attachFieldsToBody: "keyValues",
     onFile,
@@ -32,4 +33,4 @@ const multipartPlugin: FastifyPluginAsync = async (instance) => {
   });
 };
 
-export default multipartPlugin;
+export default registerMultipartPlugin;
