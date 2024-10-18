@@ -13,6 +13,7 @@ import {
 } from "./schemas";
 import registerMultipartPlugin from "../multipart";
 import basicAuthPlugin from "../accounts/basicAuth";
+import { pathToFilesFolder } from "../constants";
 
 export const router: FastifyPluginAsync = async (instance) => {
   await basicAuthPlugin(instance);
@@ -47,6 +48,7 @@ export const router: FastifyPluginAsync = async (instance) => {
     "/file",
     { schema: postFileMessageSchema },
     async (req, res) => {
+      //TODO: Move to the envs
       const pathToFile = `/uploads/${req.body.file}`;
 
       try {
@@ -85,7 +87,7 @@ export const router: FastifyPluginAsync = async (instance) => {
 
       if (message?.type === MessageType.FILE) {
         const readStream = fs.createReadStream(
-          `${process.cwd()}${message.content}`
+          `${pathToFilesFolder}${message.content}`
         );
         const fileType = mime.getType(message.content);
 
