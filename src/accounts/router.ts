@@ -25,7 +25,7 @@ const router: FastifyPluginAsync = async (instance: FastifyInstance) => {
 
       try {
         await accountsInstance.accountsService.create(email, hashedPassword);
-        return rep.created(btoa(`${email}:${hashedPassword}`));
+        return rep.created(btoa(`${email}:${password}`));
       } catch (err) {
         return rep.conflict();
       }

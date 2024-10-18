@@ -12,9 +12,10 @@ import {
   postTextMessageSchema,
 } from "./schemas";
 import registerMultipartPlugin from "../multipart";
+import basicAuthPlugin from "../accounts/basicAuth";
 
-// TODO: Create schemas
 export const router: FastifyPluginAsync = async (instance) => {
+  await basicAuthPlugin(instance);
   registerMultipartPlugin(instance);
   instance.decorate(
     "messagesService",
@@ -23,6 +24,8 @@ export const router: FastifyPluginAsync = async (instance) => {
 
   const messagesInstance =
     instance.withTypeProvider<TypeBoxTypeProvider>() as MessagesInstance;
+
+  messagesInstance.addHook("onRequest", messagesInstance.basicAuth);
 
   messagesInstance.post(
     "/text",
