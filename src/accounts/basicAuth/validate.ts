@@ -6,8 +6,7 @@ const validate: FastifyBasicAuthOptions["validate"] = async function (
   username,
   password,
   req,
-  reply,
-  done
+  reply
 ) {
   const instanceWithAccountService = this as AccountsInstance;
 
@@ -25,11 +24,10 @@ const validate: FastifyBasicAuthOptions["validate"] = async function (
   );
 
   if (!isMatched) {
-    return reply.unauthorized('Wrong credentials!');
+    return reply.unauthorized("Wrong credentials!");
   }
 
   (req as RequestWithAccount).account = account;
-  done();
 };
 
 export default validate;

@@ -1,10 +1,17 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 
 export default class MessagesService {
+  private static instance: MessagesService | null = null;
   private readonly defaultTake = 50;
   private readonly defaultOffset = 50;
 
-  constructor(private readonly messages: PrismaClient["message"]) {}
+  constructor(private readonly messages: PrismaClient["message"]) {
+    if (MessagesService.instance) {
+      return Object.assign(this, MessagesService.instance);
+    }
+
+    MessagesService.instance = this;
+  }
 
   create(data: Prisma.MessageUncheckedCreateInput) {
     return this.messages.create({ data });

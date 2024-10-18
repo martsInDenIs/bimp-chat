@@ -6,6 +6,7 @@ export default class AccountsService {
   constructor(private readonly accounts: PrismaClient["account"]) {
     if (AccountsService.instance) {
       Object.assign(this, AccountsService.instance);
+      return;
     }
 
     AccountsService.instance = this;
