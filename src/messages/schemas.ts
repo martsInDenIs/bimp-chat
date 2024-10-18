@@ -1,9 +1,7 @@
 import { Type } from "@fastify/type-provider-typebox";
-import { FastifySchema } from "fastify";
 
 export const postTextMessageSchema = {
   body: Type.Object({
-    accountId: Type.String({ format: "uuid" }),
     content: Type.String(),
   }),
 };
@@ -11,7 +9,6 @@ export const postTextMessageSchema = {
 export const postFileMessageSchema = {
   body: Type.Object({
     file: Type.String(),
-    accountId: Type.String({ format: "uuid" }),
   }),
 };
 

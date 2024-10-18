@@ -14,6 +14,7 @@ import {
 import registerMultipartPlugin from "../multipart";
 import basicAuthPlugin from "../accounts/basicAuth";
 import { pathToFilesFolder } from "../constants";
+import { RequestWithAccount } from "../accounts/basicAuth/types";
 
 export const router: FastifyPluginAsync = async (instance) => {
   await basicAuthPlugin(instance);
@@ -32,9 +33,13 @@ export const router: FastifyPluginAsync = async (instance) => {
     "/text",
     { schema: postTextMessageSchema },
     async (req, rep) => {
+      const { content } = req.body;
+      const account = (req as RequestWithAccount).account;
+
       try {
         await messagesInstance.messagesService.create({
-          ...req.body,
+          content,
+          accountId: account.id,
           type: MessageType.TEXT,
         });
         return rep.created();
@@ -48,13 +53,14 @@ export const router: FastifyPluginAsync = async (instance) => {
     "/file",
     { schema: postFileMessageSchema },
     async (req, res) => {
+      const account = (req as RequestWithAccount).account;
       //TODO: Move to the envs
       const pathToFile = `/uploads/${req.body.file}`;
 
       try {
         await messagesInstance.messagesService.create({
           type: MessageType.FILE,
-          accountId: req.body.accountId,
+          accountId: account.id,
           content: pathToFile,
         });
         return res.created();
@@ -62,6 +68,7 @@ export const router: FastifyPluginAsync = async (instance) => {
         fs.unlink(`${process.cwd}${pathToFile}`, (err) => {
           instance.log.error(err);
         });
+
         return res.serverError(err);
       }
     }
