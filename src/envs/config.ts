@@ -1,6 +1,5 @@
 import { FastifyEnvOptions } from "@fastify/env";
 
-// TODO: Bind the type with the schema below
 export type ENVS = {
   PORT: number;
   HOST: string;

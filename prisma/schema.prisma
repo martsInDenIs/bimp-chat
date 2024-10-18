@@ -26,6 +26,7 @@ model Message {
   account   Account     @relation(fields: [accountId], references: [id])
   accountId String      @db.Uuid
   content   String
+  createdAt DateTime    @default(now())
 }
 
 enum MessageType {

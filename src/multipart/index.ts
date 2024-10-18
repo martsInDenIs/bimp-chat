@@ -3,10 +3,12 @@ import { FastifyInstance, FastifyRequest } from "fastify";
 import fs from "fs";
 import { MultipartFileWithResponseValue } from "./types";
 import { pathToFilesFolder } from "../constants";
+import { generateFileName } from "../helpers";
 
 const onFile = async function (this: FastifyRequest, part: MultipartFile) {
+  const fileName = generateFileName(part.filename);
   const writeStream = fs.createWriteStream(
-    `${pathToFilesFolder}/${part.filename}`
+    `${pathToFilesFolder}/${fileName}`
   );
   part.file.pipe(writeStream);
 
@@ -16,7 +18,7 @@ const onFile = async function (this: FastifyRequest, part: MultipartFile) {
       this.log.info("File saving done!");
 
       // Pass filename to the body
-      partWithResponse.value = part.filename;
+      partWithResponse.value = fileName;
       response("done");
     });
 

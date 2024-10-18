@@ -54,18 +54,16 @@ export const router: FastifyPluginAsync = async (instance) => {
     { schema: postFileMessageSchema },
     async (req, res) => {
       const account = (req as RequestWithAccount).account;
-      //TODO: Move to the envs
-      const pathToFile = `/uploads/${req.body.file}`;
 
       try {
         await messagesInstance.messagesService.create({
           type: MessageType.FILE,
           accountId: account.id,
-          content: pathToFile,
+          content: req.body.file,
         });
         return res.created();
       } catch (err) {
-        fs.unlink(`${process.cwd}${pathToFile}`, (err) => {
+        fs.unlink(`${pathToFilesFolder}/${req.body.file}`, (err) => {
           instance.log.error(err);
         });
 
@@ -94,7 +92,7 @@ export const router: FastifyPluginAsync = async (instance) => {
 
       if (message?.type === MessageType.FILE) {
         const readStream = fs.createReadStream(
-          `${pathToFilesFolder}${message.content}`
+          `${pathToFilesFolder}/${message.content}`
         );
         const fileType = mime.getType(message.content);
 

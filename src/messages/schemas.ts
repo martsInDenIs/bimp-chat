@@ -24,6 +24,6 @@ export const getMessagesListSchema = {
 
 export const getMessageContentSchema = {
   querystring: Type.Object({
-    id: Type.String(),
+    id: Type.String({ format: "uuid" }),
   }),
 };
