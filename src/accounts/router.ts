@@ -1,12 +1,10 @@
 import { FastifyInstance, FastifyPluginAsync } from "fastify";
 import AccountsService from "./service";
-import fastifyBcrypt from "fastify-bcrypt";
 import { AccountsInstance } from "./types";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import { accountRegisterSchema } from "./schemas";
 
 const router: FastifyPluginAsync = async (instance: FastifyInstance) => {
-  instance.register(fastifyBcrypt);
   instance.decorate(
     "accountsService",
     new AccountsService(instance.database.account)

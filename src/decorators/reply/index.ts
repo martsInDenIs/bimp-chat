@@ -6,7 +6,7 @@ declare module "fastify" {
     created(payload?: unknown): void;
     conflict(): void;
     serverError(err: unknown): void;
-    unauthorized(): void;
+    unauthorized(message?: string): void;
   }
 }
 
@@ -18,8 +18,8 @@ const replyPlugin: FastifyPluginAsync = fastifyPlugin(async (instance) => {
   instance.decorateReply("conflict", function () {
     this.status(409).send();
   });
-  instance.decorateReply("unauthorized", function () {
-    this.status(401).send();
+  instance.decorateReply("unauthorized", function (message) {
+    this.status(401).send(message);
   });
 
   instance.decorateReply("serverError", function (err) {
