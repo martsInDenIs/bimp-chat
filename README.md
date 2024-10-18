@@ -22,7 +22,7 @@ You may need to use some variables inside `.env` file:
 * DATABASE_NAME - the name of the database to be worked with.
 
 # OpenAPI
-You can use [OpenAPI(online)](https://editor.swagger.io/) to make requests to the server. Just copy content from the `swagger.yaml` file and paste it to the Swagger editor.
+You can use [OpenAPI(online)](https://editor.swagger.io/) to make requests to the server. Just copy content from the `swagger.yaml` file and paste it to the Swagger editor. Please note, if you change PORT and HOST in the `.env` file, you need to change host/port it in the `swagger.yaml` too.
 
 # Ways to improve
 1. Creating indexes for the database when the system load increases.
