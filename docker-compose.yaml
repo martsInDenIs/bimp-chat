@@ -23,6 +23,9 @@ services:
         condition: service_healthy
     build:
       dockerfile: ./Dockerfile
+    volumes:
+      - uploads:/usr/src/app/uploads
     ports: ['${PORT}:${PORT}']
 volumes:
   postgres_data:
+  uploads:

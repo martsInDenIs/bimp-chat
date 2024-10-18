@@ -8,6 +8,4 @@ RUN npm install
 
 COPY . .
 
-RUN mkdir uploads
-
 RUN npx prisma generate
