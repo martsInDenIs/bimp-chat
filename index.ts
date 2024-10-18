@@ -6,6 +6,7 @@ import messagesPlugin from "./src/messages";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 import replyPlugin from "./src/decorators/reply";
 import fastifyBcrypt from "fastify-bcrypt";
+import fastifyCors from "@fastify/cors";
 
 const fastify = Fastify({
   logger: true,
@@ -16,6 +17,10 @@ await fastify.register(envPlugin);
 await fastify.register(databasePlugin);
 await fastify.register(replyPlugin);
 
+// Temporal solution. Just to allow use it with Swagger
+fastify.register(fastifyCors, {
+  origin: "*",
+});
 fastify.register(accountsPlugin);
 fastify.register(messagesPlugin);
 

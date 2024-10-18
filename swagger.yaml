@@ -1,0 +1,172 @@
+openapi: 3.0.1
+info:
+  title: Messages and Accounts API
+  description: API for managing messages and accounts (registration, text and file-based messages)
+  version: 1.0.0
+servers:
+- url: http://localhost:3000
+tags:
+- name: account
+  description: Managing accounts
+- name: message
+  description: Everything with messages
+paths:
+  /account/register:
+    post:
+      tags:
+      - 'account'
+      summary: Register a new account
+      description: Registers a new account with an email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+              required:
+              - email
+              - password
+      responses:
+        201:
+          description: Account created successfully, returns Base64 encoded credentials
+        409:
+          description: Conflict error, account already exists
+        500:
+          description: Server error
+  /message/text:
+    post:
+      security:
+      - basicAuth: []
+      tags:
+      - 'message'
+      summary: Create a text message
+      description: Creates a text message and associates it with an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+              required:
+              - content
+      responses:
+        201:
+          description: Message created successfully
+        500:
+          description: Server error
+  /message/file:
+    post:
+      security:
+      - basicAuth: []
+      tags:
+      - 'message'
+      summary: Upload a file message
+      description: Uploads a file message and associates it with an account
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        201:
+          description: File message created successfully
+        500:
+          description: Server error, and file deletion attempted
+  /message/list:
+    get:
+      security:
+      - basicAuth: []
+      tags:
+      - 'message'
+      summary: Get list of messages
+      description: Retrieves a list of messages with pagination options
+      parameters:
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+        required: false
+      - name: skip
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+        required: false
+      - name: take
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+        required: false
+      responses:
+        200:
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messagesNumber:
+                    type: integer
+                  messages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        content:
+                          type: string
+                        type:
+                          type: string
+        500:
+          description: Server error
+  /message/content:
+    get:
+      security:
+      - basicAuth: []
+      tags:
+      - 'message'
+      summary: Get message content by ID
+      description: Retrieves the content of a message, either text or file, by message ID
+      parameters:
+      - name: id
+        in: query
+        schema:
+          type: string
+          format: uuid
+        required: true
+      responses:
+        200:
+          description: Message content returned
+          content:
+            text/plain:
+              schema:
+                type: string
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        500:
+          description: Server error
+components:
+  securitySchemes:
+    basicAuth: # <-- arbitrary name for the security scheme
+      type: http
+      scheme: basic
+
